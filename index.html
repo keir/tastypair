@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en" ng-app="tastypair">
+  <head>
+    <link rel="stylesheet"
+          type="text/css"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  </head>
+  <body ng-controller="MainCtrl">
+    <h1>TastyPair</h1>
+    <form ng-submit="addFood()">
+      <input type="text"
+             class="form-control"
+             name="foodInput"
+             ng-model="tasty.foodInput">
+      <input type="submit" name="submit" value="Add">
+    </form>
+    <div class="row">
+      <div class="col-xs-6">
+        <ul>
+          <li ng-repeat="food in tasty.chosenFoods" ng-bind="food"></li>
+        </ul>
+      </div>
+      <div class="col-xs-6">
+        <ul>
+          <li ng-repeat="food in tasty.recommendedFoods" ng-bind="food"></li>
+        </ul>
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.2.20/angular.js">
+    </script>
+    <script src="app.js"></script>
+  </body>
+</html>
