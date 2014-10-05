@@ -1,5 +1,6 @@
 import json
 import re
+import sys
 from collections import defaultdict
 
 def extract_ingredients_from_string(description):
@@ -32,11 +33,13 @@ if __name__ == '__main__':
   num_items_seen = 10
   venues_with_menus = json.loads(open('menus.json').read())
   for venue in venues_with_menus:
-    for menu in venue['menus']:
+    if not venue.get('menus'):
+      print >> sys.stderr, 'Missing menus:', venue.get('name'), venue.get('hash_id')
+    for menu in venue.get('menus', []):
       for section in menu.get('sections', []):
-        # todo: section['name']
+        # Maybe: use section['name']
         for subsection in section.get('subsections', []):
-          # todo: subsection['name'] ?
+          # Maybe: use subsection['name']
           for item in subsection.get('contents', []):
             text_to_inspect_for_item = []
             text_to_inspect_for_item.append(item.get('name'))
@@ -47,14 +50,11 @@ if __name__ == '__main__':
                 text_to_inspect_for_item.append(option.get('name'))
             ingredients_list = map(extract_ingredients_from_string,
                                    text_to_inspect_for_item)
-            combined_ingredients = []
-            map(combined_ingredients.extend, ingredients_list)
+            combined_ingredients = set()
+            map(combined_ingredients.update, ingredients_list)
+            combined_ingredients = list(combined_ingredients)
             add_paired_ingredients_to_pairing_store(pairing_store,
                                                     combined_ingredients)
-
             num_items_seen += 1
-            if num_items_seen == 20:
-              print json.dumps(pairing_store, indent=2)
-              import sys
-              sys.exit(0)
+  print json.dumps(pairing_store, indent=2, sort_keys=True)
   
