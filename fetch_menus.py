@@ -74,8 +74,11 @@ def query_for_venues_with_menus(args):
     "venue_queries": [
       {
         "location" : {
-          "locality" : "San Mateo",
+          "locality" : "San Francisco",
           "country" : "United States",
+        },
+        "categories": {
+          "$contains_any": ["restaurant"]
         },
         "menus" : {
           "$present" : True
@@ -186,8 +189,11 @@ def venues_for_args(args):
         # for that venue is requested. In that case, subtract out the redirect.
         redirected_from_venue = venue.get('redirected_from')
         if type(redirected_from_venue) == list:
-          assert len(redirected_from_venue) == 1
-          redirected_from_venue = redirected_from_venue[0]
+          if len(redirected_from_venue) != 1:
+            log('Got REALLY unexpecetd multiple-redirect: %s' %
+                redirected_from_venue)
+          if redirected_from_venue:
+            redirected_from_venue = redirected_from_venue[0]
         if redirected_from_venue and redirected_from_venue in venues:
           # Good; this is a redirect from a venue we were looking for.
           venues_to_fetch.remove(redirected_from_venue)
