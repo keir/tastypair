@@ -5,17 +5,30 @@ from collections import defaultdict
 def extract_ingredients_from_string(description):
   if description:
     cleaned_description = re.sub('[^a-z ]', '', description.lower())
-    return cleaned_description.split()
+    return [item for item in cleaned_description.split() if item]
+  return []
 
 def make_pairing_store():
-  return defaultdict(lambda: defautdict(int))
+  return dict(pairings=defaultdict(lambda: defaultdict(int)),
+              ingredients=defaultdict(int),
+              total_ingredients=0,
+              total_pairings=0)
 
-def record_pairing(pairings, a, b):
+def record_pairing(pairing_store, a, b):
+  pairing_store['total_pairings'] += 1
   if a and b:
-    pairings[a][b] += 1
-    pairings[b][a] += 1
+    pairing_store['pairings'][a][b] += 1
+    pairing_store['pairings'][b][a] += 1
+
+def add_paired_ingredients_to_pairing_store(pairing_store, paired_items):
+  for i, item_1 in enumerate(paired_items):
+    pairing_store['total_ingredients'] += 1
+    pairing_store['ingredients'][item_1] += 1
+    for item_2 in paired_items[i + 1:]:
+      record_pairing(pairing_store, item_1, item_2)
 
 if __name__ == '__main__':
+  pairing_store = make_pairing_store()
   num_items_seen = 10
   venues_with_menus = json.loads(open('menus.json').read())
   for venue in venues_with_menus:
@@ -32,14 +45,16 @@ if __name__ == '__main__':
               text_to_inspect_for_item.append(option_group.get('text'))
               for option in option_group.get('options', []):
                 text_to_inspect_for_item.append(option.get('name'))
-            print json.dumps(map(extract_ingredients_from_string,
-                                 text_to_inspect_for_item),
-                             indent=2, sort_keys=True)
+            ingredients_list = map(extract_ingredients_from_string,
+                                   text_to_inspect_for_item)
+            combined_ingredients = []
+            map(combined_ingredients.extend, ingredients_list)
+            add_paired_ingredients_to_pairing_store(pairing_store,
+                                                    combined_ingredients)
+
             num_items_seen += 1
             if num_items_seen == 20:
+              print json.dumps(pairing_store, indent=2)
               import sys
               sys.exit(0)
-
-
-
   
